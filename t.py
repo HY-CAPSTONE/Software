@@ -27,7 +27,7 @@ def currentstate():
                 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
     elif state == b:
-        smile = [[0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
+        emoji = [[0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
                    [0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0],
                    [0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0],
                    [0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
@@ -45,7 +45,7 @@ def currentstate():
                    [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0]]
 
     elif state == c:
-        hot= [[0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
+        hot = [[0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
                 [0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0],
                 [0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0],
                 [0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],
@@ -233,7 +233,7 @@ def currentstate():
 def showMatrix(w, h, block_orientation, rotate):
     # create matrix device
     serial = spi(port=0, device=0, gpio=noop())
-    device = max7219(serial, width=w, height=h, rotate=rotate, block_orientation=block_orientation)
+    device = max7219(serial, width=16, height=16, rotate=rotate, block_orientation=block_orientation)
     print("Created device")
 
     # currentstate()

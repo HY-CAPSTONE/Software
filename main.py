@@ -1,8 +1,14 @@
 import threading
-import time
 import RPi.GPIO as GPIO
 import sys
-import ../Adafruit_DHT
+import time
+
+import my_dht11 as dht
+import my_pump as pump
+import my_wflow as wflow
+import my_pcf as pcf
+import interaction 
+
 
 class Worker(threading.Thread):
 	def __init__(self, name):
@@ -12,28 +18,67 @@ class Worker(threading.Thread):
 
 	def run(self):
 		# print dot matrix
+		displaying()
+		
 
 
 
-def displaying:
+def displaying():
 	# thread exist -> kill thread & create new one
-	t = Worker("dotMatrix")
-	t.daemon = True
-	t.start()
+	interaction = Worker("dotMatrix")
+	interaction.daemon = True
+	interaction.start()
+	interaction.run()
 
 
-displaying()
-sensor = Adafruit_DHT.DHT11
-pint = 18 # pin number
+def printValue(humi, temper, wlvl, soil):
+	print("humi:{0}, temp:{1}, wlwvl:{2}, soil:{3}\n ".format(humi, temper, wlvl, soil))
+
+# Adding path
+sys.path.append("/home/pi/Documents/Adafruit_Python_DHT/")
+
 
 try:
-	while 1:
-		humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
-		if humidity is not None and temperature is not None:
-			print("temp={0:0.1f},  Humidity={1:0.1f}%".format(temperature, humidity))
+	g_temperature = 0
+	g_humidity = 0
+	g_wflow = 0
+	g_wlvl = 0
+	g_soil = 0
+	water_state = 0
+	temp_state = 0
+	sun_state = 0
+
+	while True:
+		g_humidity, g_temperature = dht.readValue()
+		g_wlvl = pcf.getWaterLevel()
+		g_soil = pcf.getSoilMoisture()
+		printValue(g_humidity, g_temperature, g_wlvl, g_soil)
+
+		if (g_soil < 200):
+			pump.doPumpTime(1)
+			g_wflow = wflow.getWaterFlow()
+			print("g_wflow:{0}mL\n".format(g_wflow))
+
+		time.sleep(0.5)
+
+		if(g_temperature > 30):
+			temp_state = 1
+			print("temp_state=1")
+			interaction.showtempMatrix(temp_state)
+		elif(g_temperature < 30):
+			temp_state = 2
+			print("temp_state =2")
+			interaction.showtempMatrix(temp_state)
 		else:
-			print("DHT Error")				
-		
+			temp_state = 0
+			interaction.showtempMatrix(temp_state)
+
+		if(g_wlvl < 10):
+			water_state = 1
+			interaction.showwaterMatrix(water_state)
+
+
+
 
 except KeyboardInterrupt:
 	GPIO.cleanup()

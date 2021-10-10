@@ -13,11 +13,11 @@ from luma.core.legacy import text
 from luma.core.legacy.font import proportional, LCD_FONT
 
 
-def demo(w, h, block_orientation, rotate):
+def demo():
     # create matrix device
     serial = spi(port=0, device=0, gpio=noop())
-    device = max7219(serial, width=w, height=h, rotate=rotate,
-                     block_orientation=block_orientation)
+    device = max7219(serial, width=16, height=16, rotate=0,
+                     block_orientation=90)
     print("Created device")
 
     void_emoji = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -233,19 +233,8 @@ def demo(w, h, block_orientation, rotate):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='matrix_demo arguments',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument('--width', type=int, default=16, help='Width')
-    parser.add_argument('--height', type=int, default=16, help='height')
-    parser.add_argument('--block-orientation', type=int, default=-90, choices=[
-                        0, 90, -90], help='Corrects block orientation when wired vertically')
-    parser.add_argument('--rotate', type=int, default=0,
-                        choices=[0, 1, 2, 3], help='Rotation factor')
-
-    args = parser.parse_args()
-
+    
     try:
-        demo(args.width, args.height, args.block_orientation, args.rotate)
+        demo()
     except KeyboardInterrupt:
         pass
