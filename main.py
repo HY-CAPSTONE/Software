@@ -64,22 +64,20 @@ def setup_system():
 
 
 if __name__ == "__main__":
-  	dht_t, wlevel_t, wflow_t, soil_t = setup_system()
+    dht_t, wlevel_t, wflow_t, soil_t = setup_system()
     try:
-		global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
+        global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
             print("start")
-            insert_executor(mysql_cursor, mysql_con, "Sensors",
-                            potID, datetime.datetime.now())
+            insert_executor(mysql_cursor, mysql_con, "Sensors", potID, datetime.datetime.now())
 
-            print("{}, {}, {}, {}, {}".format(g_temperature,
-                                              g_humidity, g_wflow, g_wlvl, g_soil))
+            print("{}, {}, {}, {}, {}".format(g_temperature, g_humidity, g_wflow, g_wlvl, g_soil))
 
             time.sleep(50)
 
-	except KeyboardInterrupt as e:
-		print(e)
+    except KeyboardInterrupt as e:
+        print(e)
 
     finally:
         GPIO.cleanup()
