@@ -69,6 +69,7 @@ def setup_system():
 
 if __name__ == "__main__":
     try:
+        init_global()
         dht_t, wlevel_t, wflow_t, soil_t = setup_system()
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
