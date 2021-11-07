@@ -51,10 +51,10 @@ def setup_system():
     wflow_thread = Thread(target=getWaterFlowValue)
     soilmois_thread = Thread(target=getSoilMoistureValue)
 
-    # dht_thread.start()
-    # wlevel_thread.start()
-    # wflow_thread.start()
-    # soilmois_thread.start()
+    dht_thread.start()
+    wlevel_thread.start()
+    wflow_thread.start()
+    soilmois_thread.start()
 
     return dht_thread, wlevel_thread, wflow_thread, soilmois_thread
 
@@ -68,8 +68,8 @@ if __name__ == "__main__":
             insert_executor(mysql_cursor, mysql_con, "Sensors",
                             potID, datetime.datetime.now())
 
-            print("{}, {}, {}, {}, {}", g_temperature,
-                  g_humidity, g_wflow, g_wlvl, g_soil)
+            print("{}, {}, {}, {}, {}".format(g_temperature,
+                                              g_humidity, g_wflow, g_wlvl, g_soil))
 
             time.sleep(1000)
 
