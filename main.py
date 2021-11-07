@@ -1,5 +1,6 @@
 from threading import Thread
 from multiprocessing import Process, Queue
+from header import g_temperature, g_humidity, g_wflow, g_wlvl, g_soil
 import RPi.GPIO as GPIO
 import sys
 import time
@@ -44,16 +45,6 @@ def setup_system():
     # Adding path
     sys.path.append("/home/pi/Documents/Adafruit_Python_DHT/")
 
-    # define global value
-    global g_temperature
-    global g_humidity
-    global g_wflow
-    global g_wlvl
-    global g_soil
-    global water_state
-    global temp_state
-    global sun_state
-
     # make thread for I/O
     dht_thread = Thread(target=getDhtValues)
     wlevel_thread = Thread(target=getWaterLevelValue)
@@ -74,11 +65,12 @@ if __name__ == "__main__":
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
             print("start")
-            insert_executor(mysql_cursor, "Sensors",
+            insert_executor(mysql_cursor, mysql_con, "Sensors",
                             potID, datetime.datetime.now())
 
             print("{}, {}, {}, {}, {}", g_temperature,
                   g_humidity, g_wflow, g_wlvl, g_soil)
+
             time.sleep(1000)
 
     except Exception as e:
