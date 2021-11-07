@@ -18,7 +18,7 @@ def getDhtValues():
     global g_temperature, g_humidity
     g_humidity, g_temperature = dht.readValue()
     print("humi:{}, temp:{}".format(g_humidity, g_temperature))
-    time.sleep(10)
+    time.sleep(50)
 
 
 def getWaterLevelValue():
@@ -26,7 +26,7 @@ def getWaterLevelValue():
     while True:
         g_wlvl = pcf.getWaterLevel()
         print("waterLevel:{}".format(g_wlvl))
-        time.sleep(10)
+        time.sleep(50)
 
 
 def getWaterFlowValue():
@@ -34,7 +34,7 @@ def getWaterFlowValue():
     while True:
         g_wflow = wflow.getWaterFlow()
         print("waterflow:{}".format(g_wflow))
-        time.sleep(10)
+        time.sleep(50)
 
 
 def getSoilMoistureValue():
@@ -42,7 +42,7 @@ def getSoilMoistureValue():
     while True:
         g_soil = pcf.getSoilMoisture()
         print("SoilMois:{}".format(g_soil))
-        time.sleep(10)
+        time.sleep(50)
 
 
 def setup_system():
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
             print("start")
-            time.sleep(50)
+            time.sleep(10)
             insert_executor(
                 mysql_cursor,
                 mysql_con,
