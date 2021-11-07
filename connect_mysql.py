@@ -1,5 +1,6 @@
 import mysql.connector
 import time
+import datetime
 
 
 # connection, cursor, pid를 리턴.
@@ -41,7 +42,7 @@ def check_PID(cursor, PID):
 
 def insert_executor(cursor, table_name, param1, param2):
     if table_name == "Sensors":
-        sql = "insert into Sensors(Stiem, PID, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES();"
+        sql = "insert into Sensors(PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES(%s, %s, 0, 0, 0, 0, 0, 0);"
     elif table_name == "Planter":
         sql = "insert into Planter(Ptype, Pdate) values(%s, %s);"
 
@@ -57,8 +58,11 @@ if __name__ == "__main__":
         print("start")
         mysql_con, mysql_cursor, pid = setup_DB()
 
-        insert_executor(mysql_cursor, "Planter",
-                        "param1", "2021-11-7 12:53:33")
+        # insert_executor(mysql_cursor, "Planter",
+        #                 "param1", "2021-11-7 12:53:33")
+        currtime = datetime.datetime.now()
+        print(currtime)
+        insert_executor(mysql_cursor, "Sensors", str(pid), str(currtime))
         print("query_executor")
 
         mysql_cursor.close()
