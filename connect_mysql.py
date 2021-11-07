@@ -40,7 +40,7 @@ def check_PID(cursor, PID):
         return True
 
 
-def insert_executor(cursor, table_name, param1, param2):
+def insert_executor(cursor, mysql_con, table_name, param1, param2):
     if table_name == "Sensors":
         sql = "insert into Sensors(PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES(%s, %s, 0, 0, 0, 0, 0, 0);"
     elif table_name == "Planter":
