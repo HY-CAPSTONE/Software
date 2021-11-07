@@ -3,6 +3,7 @@ from multiprocessing import Process, Queue
 import RPi.GPIO as GPIO
 import sys
 import time
+import datetime
 
 import my_dht11 as dht
 import my_pump as pump
@@ -39,11 +40,6 @@ def getSoilMoistureValue():
         time.sleep(1)
 
 
-def printValue(humi, temper, wlvl, soil):
-    print("humi:{0}, temp:{1}, wlwvl:{2}, soil:{3}\n ".format(
-        humi, temper, wlvl, soil))
-
-
 def setup_system():
     # Adding path
     sys.path.append("/home/pi/Documents/Adafruit_Python_DHT/")
@@ -64,10 +60,10 @@ def setup_system():
     wflow_thread = Thread(target=getWaterFlowValue)
     soilmois_thread = Thread(target=getSoilMoistureValue)
 
-    dht_thread.start()
-    wlevel_thread.start()
-    wflow_thread.start()
-    soilmois_thread.start()
+    # dht_thread.start()
+    # wlevel_thread.start()
+    # wflow_thread.start()
+    # soilmois_thread.start()
 
     return dht_thread, wlevel_thread, wflow_thread, soilmois_thread
 
@@ -78,6 +74,11 @@ if __name__ == "__main__":
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
             print("start")
+            insert_executor(mysql_cursor, "Sensors",
+                            potID, datetime.datetime.now())
+
+            print("{}, {}, {}, {}, {}", g_temperature,
+                  g_humidity, g_wflow, g_wlvl, g_soil)
             time.sleep(1000)
 
     except Exception as e:
