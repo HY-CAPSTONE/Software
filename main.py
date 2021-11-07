@@ -70,7 +70,19 @@ if __name__ == "__main__":
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
             print("start")
-            insert_executor(mysql_cursor, mysql_con, "Sensors", potID, datetime.datetime.now())
+            insert_executor(
+                mysql_cursor,
+                mysql_con,
+                "Sensors",
+                potID,
+                datetime.datetime.now(),
+                g_temperature,
+                g_humidity,
+                g_soil,
+                g_wlvl,
+                0,
+                g_wflow,
+            )
 
             print("{}, {}, {}, {}, {}".format(g_temperature, g_humidity, g_wflow, g_wlvl, g_soil))
 
