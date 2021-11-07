@@ -14,21 +14,15 @@ import interaction
 from connect_mysql import setup_DB, insert_executor
 
 
-def init_global():
-    global g_temperature
-    global g_humidity
-    global g_wflow
-    global g_wlvl
-    global g_soil
-
-
 def getDhtValues():
+    global g_temperature, g_humidity
     g_humidity, g_temperature = dht.readValue()
     print("humi:{}, temp:{}".format(g_humidity, g_temperature))
     time.sleep(10)
 
 
 def getWaterLevelValue():
+    global g_wlvl
     while True:
         g_wlvl = pcf.getWaterLevel()
         print("waterLevel:{}".format(g_wlvl))
@@ -36,6 +30,7 @@ def getWaterLevelValue():
 
 
 def getWaterFlowValue():
+    global g_wflow
     while True:
         g_wflow = wflow.getWaterFlow()
         print("waterflow:{}".format(g_wflow))
@@ -43,6 +38,7 @@ def getWaterFlowValue():
 
 
 def getSoilMoistureValue():
+    global g_soil
     while True:
         g_soil = pcf.getSoilMoisture()
         print("SoilMois:{}".format(g_soil))
@@ -69,7 +65,6 @@ def setup_system():
 
 if __name__ == "__main__":
     try:
-        init_global()
         dht_t, wlevel_t, wflow_t, soil_t = setup_system()
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
