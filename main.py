@@ -17,28 +17,28 @@ from connect_mysql import setup_DB, insert_executor
 def getDhtValues():
     g_humidity, g_temperature = dht.readValue()
     print("humi:{}, temp:{}".format(g_humidity, g_temperature))
-    time.sleep(1)
+    time.sleep(10)
 
 
 def getWaterLevelValue():
     while True:
         g_wlvl = pcf.getWaterLevel()
         print("waterLevel:{}".format(g_wlvl))
-        time.sleep(1)
+        time.sleep(10)
 
 
 def getWaterFlowValue():
     while True:
         g_wflow = wflow.getWaterFlow()
         print("waterflow:{}".format(g_wflow))
-        time.sleep(1)
+        time.sleep(10)
 
 
 def getSoilMoistureValue():
     while True:
         g_soil = pcf.getSoilMoisture()
         print("SoilMois:{}".format(g_soil))
-        time.sleep(1)
+        time.sleep(10)
 
 
 def setup_system():
@@ -71,7 +71,7 @@ if __name__ == "__main__":
             print("{}, {}, {}, {}, {}".format(g_temperature,
                                               g_humidity, g_wflow, g_wlvl, g_soil))
 
-            time.sleep(1000)
+            time.sleep(50)
 
     except Exception as e:
         print(e)
