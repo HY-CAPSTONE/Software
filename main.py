@@ -1,6 +1,6 @@
 from threading import Thread
 from multiprocessing import Process, Queue
-from header import g_temperature, g_humidity, g_wflow, g_wlvl, g_soil
+from header import g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
 import RPi.GPIO as GPIO
 import sys
 import time
@@ -12,6 +12,14 @@ import my_wflow as wflow
 import my_pcf as pcf
 import interaction
 from connect_mysql import setup_DB, insert_executor
+
+
+def init_global():
+    global g_temperature
+    global g_humidity
+    global g_wflow
+    global g_wlvl
+    global g_soil
 
 
 def getDhtValues():
