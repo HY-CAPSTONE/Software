@@ -70,6 +70,7 @@ if __name__ == "__main__":
         mysql_con, mysql_cursor, potID = setup_DB()
         while True:
             print("start")
+            time.sleep(50)
             insert_executor(
                 mysql_cursor,
                 mysql_con,
@@ -85,8 +86,6 @@ if __name__ == "__main__":
             )
 
             print("{}, {}, {}, {}, {}".format(g_temperature, g_humidity, g_wflow, g_wlvl, g_soil))
-
-            time.sleep(50)
 
     except KeyboardInterrupt as e:
         print(e)
