@@ -7,8 +7,7 @@ import datetime
 # 자신의 PID가 DB에 없으면, wait
 def setup_DB():
     pid = 99
-    mysql_con = create_sql_connector(
-        "112.170.208.72", "20", "testDB", "root", "wlgkcjf21gh")
+    mysql_con = create_sql_connector("112.170.208.72", "20", "testDB", "root", "wlgkcjf21gh")
 
     mysql_cursor = create_sql_cursor(mysql_con)
 
@@ -20,8 +19,7 @@ def setup_DB():
 
 
 def create_sql_connector(host, port, db, user, pw):
-    mysql_con = mysql.connector.connect(
-        host=host, port=port, database=db, user=user, password=pw)
+    mysql_con = mysql.connector.connect(host=host, port=port, database=db, user=user, password=pw)
     return mysql_con
 
 
@@ -40,16 +38,18 @@ def check_PID(cursor, PID):
         return True
 
 
-def insert_executor(cursor, mysql_con, table_name, param1, param2):
+def insert_executor(
+    cursor, mysql_con, table_name, PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow
+):
     if table_name == "Sensors":
-        sql = "insert into Sensors(PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES(%s, %s, 0, 0, 0, 0, 0, 0);"
+        sql = "insert into Sensors(PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES(%s, %s, %s, %s, %s, %s, %s, %s);"
     elif table_name == "Planter":
         sql = "insert into Planter(Ptype, Pdate) values(%s, %s);"
 
     else:
         print("no such tables")
 
-    cursor.execute(sql, (param1, param2))
+    cursor.execute(sql, (PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow))
     mysql_con.commit()
 
 
