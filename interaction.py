@@ -196,7 +196,7 @@ def showtempMatrix(temp_state):
             for x in range(16):
                 if temp_emoji[x][y] == 1:
                     draw.point((x, y), fill="green")
-    time.sleep(3)
+    # time.sleep(3)
 
 
 def showwaterMatrix(water_state):
@@ -210,7 +210,7 @@ def showwaterMatrix(water_state):
             for x in range(16):
                 if water_emoji[x][y] == 1:
                     draw.point((x, y), fill="green")
-    time.sleep(3)
+    # time.sleep(3)
 
 
 def showsunMatrix(sun_state):
@@ -224,4 +224,4 @@ def showsunMatrix(sun_state):
             for x in range(16):
                 if sun_emoji[x][y] == 1:
                     draw.point((x, y), fill="green")
-    time.sleep(3)
+    # time.sleep(3)
