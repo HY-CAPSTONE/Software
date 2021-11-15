@@ -28,8 +28,11 @@ def read(mysql_con, mysql_cursor, potID):
 
     with rw_mutex:
         print("read")
-        l_temperature = g_temperature, l_humidity = g_humidity
-        l_soil = g_soil, l_wflow = g_wflow, l_wlvl = g_wlvl
+        l_temperature = g_temperature
+        l_humidity = g_humidity
+        l_soil = g_soil
+        l_wflow = g_wflow
+        l_wlvl = g_wlvl
 
     read_send_sql(
         mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
