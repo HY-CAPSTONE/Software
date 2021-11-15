@@ -26,6 +26,7 @@ def read(mysql_con, mysql_cursor, potID):
     # rw_mutex.release()
 
     with rw_mutex:
+        print("read")
         read_send_sql(mysql_con, mysql_cursor, potID)
         read_dot_matrix()
 
@@ -35,6 +36,7 @@ def write():
     # write_global_var()
     # rw_mutex.release()
     with rw_mutex:
+        print("write")
         write_global_var()
 
 
