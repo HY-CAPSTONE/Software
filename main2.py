@@ -25,34 +25,37 @@ def read(mysql_con, mysql_cursor, potID):
     # read_dot_matrix()
     # rw_mutex.release()
     global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
-    print("before write")
+    while True:
+        print("before write")
 
-    with rw_mutex:
-        print("read")
-        l_temperature = g_temperature
-        l_humidity = g_humidity
-        l_soil = g_soil
-        l_wflow = g_wflow
-        l_wlvl = g_wlvl
-	print("after write")
+        with rw_mutex:
+            print("read")
+            l_temperature = g_temperature
+            l_humidity = g_humidity
+            l_soil = g_soil
+            l_wflow = g_wflow
+            l_wlvl = g_wlvl
+        print("after write")
 
-    read_send_sql(
-        mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
-    )
-    read_dot_matrix(l_temperature, l_humidity, l_soil, l_wflow, l_wlvl)
+        read_send_sql(
+            mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
+        )
+        read_dot_matrix(l_temperature, l_humidity, l_soil, l_wflow, l_wlvl)
 
 
 def write():
     # rw_mutex.acquire()
     # write_global_var()
     # rw_mutex.release()
-	print("before write")
+    while True:
+        print("before write")
 
-	with rw_mutex:
-		print("write")
-    	write_global_var()
+        with rw_mutex:
+            print("write")
+            write_global_var()
 
-	print("after write")
+        print("after write")
+
 
 def write_global_var():
     global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
@@ -63,7 +66,7 @@ def write_global_var():
 
 
 def read_send_sql(
-mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
+    mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
 ):
     insert_executor(
         mysql_cursor,
