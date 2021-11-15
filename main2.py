@@ -24,11 +24,17 @@ def read(mysql_con, mysql_cursor, potID):
     # read_send_sql(mysql_cursor, mysql_con, potID)
     # read_dot_matrix()
     # rw_mutex.release()
+    global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
 
     with rw_mutex:
         print("read")
-        read_send_sql(mysql_con, mysql_cursor, potID)
-        read_dot_matrix()
+        l_temperature = g_temperature, l_humidity = g_humidity
+        l_soil = g_soil, l_wflow = g_wflow, l_wlvl = g_wlvl
+
+    read_send_sql(
+        mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
+    )
+    read_dot_matrix(l_temperature, l_humidity, l_soil, l_wflow, l_wlvl)
 
 
 def write():
@@ -48,38 +54,38 @@ def write_global_var():
     g_humidity, g_temperature = dht.readValue()
 
 
-def read_send_sql(mysql_con, mysql_cursor, potID):
-    global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
+def read_send_sql(
+    mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
+):
     insert_executor(
         mysql_cursor,
         mysql_con,
         "Sensors",
         potID,
         datetime.datetime.now(),
-        g_temperature,
-        g_humidity,
-        g_soil,
-        g_wlvl,
+        l_temperature,
+        l_humidity,
+        l_soil,
+        l_wflow,
         0,
-        g_wflow,
+        l_wlvl,
     )
 
 
-def read_dot_matrix():
-    global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
-    if g_soil < 200:
+def read_dot_matrix(l_temperature, l_humidity, l_soil, l_wflow, l_wlvl):
+    if l_soil < 200:
         pump.doPumpTime(1)
-    if g_temperature > 30:
+    if l_temperature > 30:
         temp_state = 1
         interaction.showtempMatrix(temp_state)
-    elif g_temperature < 30:
+    elif l_temperature < 30:
         temp_state = 2
         interaction.showtempMatrix(temp_state)
     else:
         temp_state = 0
         interaction.showtempMatrix(temp_state)
 
-    if g_wlvl < 10:
+    if l_wlvl < 10:
         water_state = 1
         interaction.showwaterMatrix(water_state)
 
