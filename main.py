@@ -24,7 +24,6 @@ try:
         g_humidity, g_temperature = dht.readValue()
         g_wlvl = pcf.getWaterLevel()
         g_soil = pcf.getSoilMoisture()
-        printValue(g_humidity, g_temperature, g_wlvl, g_soil)
 
         if g_soil < 200:
             pump.doPumpTime(1)
