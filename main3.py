@@ -66,13 +66,15 @@ def read(mysql_con, mysql_cursor, potID):
         )
         read_dot_matrix(q.g_temp, q.g_humid, q.g_soil, q.g_wflow, q.g_wlvl)
 
+        time.sleep(1)
+
 
 def write_global_var():
-    temp = SensorValues()
-    temp.g_soil = pcf.getSoilMoisture()
-    temp.g_wlvl = pcf.getWaterLevel()
-    temp.g_wflow = wflow.getWaterFlow()
-    temp.g_humid, temp.g_temp = dht.readValue()
+    g_soil = pcf.getSoilMoisture()
+    g_wlvl = pcf.getWaterLevel()
+    g_wflow = wflow.getWaterFlow()
+    g_humid, g_temp = dht.readValue()
+    temp = SensorValues(g_temp, g_humid, g_soil, g_wflow, g_wlvl)
 
     # if que is full, it will blocked 100sec
     # after 100sec, it occur "full" exception
@@ -137,7 +139,7 @@ if __name__ == "__main__":
     try:
         while True:
             print("start")
-            time.sleep(10)
+            que.join()
 
     except KeyboardInterrupt as e:
         print(e)
