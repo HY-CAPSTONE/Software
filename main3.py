@@ -17,7 +17,7 @@ import my_pcf as pcf
 import interaction
 from connect_mysql import setup_DB, insert_executor
 
-que = queue.Queue()
+que = queue.Queue(2048)
 
 
 @dataclass
@@ -37,36 +37,43 @@ class SensorValues:
 
 
 def write():
-    while True:
-        write_global_var()
+    try:
+        while True:
+            write_global_var()
+    except:
+        return 0
 
 
 def read(mysql_con, mysql_cursor, potID):
-    while True:
-        # if que is empty, it will blocked for 100sec
-        # after 100sec, it will occur "empty" exception
-        # ** if block=True & timeout=None, this operation can't stop, it is not occur keyboardexception
-        q = que.get(block=True, timeout=100)
+    try:
+        while True:
+            # if que is empty, it will blocked for 100sec
+            # after 100sec, it will occur "empty" exception
+            # ** if block=True & timeout=None, this operation can't stop, it is not occur keyboardexception
+            q = que.get(block=True, timeout=100)
 
-        # 가져온 10개의 데이터의 평균을 로컬로 저장
+            # 가져온 10개의 데이터의 평균을 로컬로 저장
 
-        # 로컬 값을 쏴주기
-        print(
-            "temp:{} humid:{} soil:{} wflow:{} wlvl:{}".format(
-                q.g_temp,
-                q.g_humid,
-                q.g_soil,
-                q.g_wflow,
-                q.g_wlvl,
+            # 로컬 값을 쏴주기
+            print(
+                "temp:{} humid:{} soil:{} wflow:{} wlvl:{}".format(
+                    q.g_temp,
+                    q.g_humid,
+                    q.g_soil,
+                    q.g_wflow,
+                    q.g_wlvl,
+                )
             )
-        )
 
-        read_send_sql(
-            mysql_con, mysql_cursor, potID, q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow
-        )
-        read_dot_matrix(q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow)
+            read_send_sql(
+                mysql_con, mysql_cursor, potID, q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow
+            )
+            read_dot_matrix(q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow)
 
-        time.sleep(1)
+            time.sleep(1)
+
+    except OSError:
+        return 0
 
 
 def write_global_var():
@@ -150,8 +157,6 @@ if __name__ == "__main__":
         print("cleanup started")
         GPIO.cleanup()
         mysql_con.close()
-        th_w.join()
-        th_r.join()
         que.join()
 
 
