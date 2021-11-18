@@ -93,7 +93,7 @@ def read_send_sql(
         Temp=l_temperature,
         Humid=l_humidity,
         SoilMois=l_soil,
-        Wlvl=l_wlvl,
+        Wlevel=l_wlvl,
         Cds=0,
         Wflow=l_wflow,
     )
