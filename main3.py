@@ -1,7 +1,8 @@
 import threading
-from multiprocessing import Process, Queue
 
-from header import g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
+# from multiprocessing import Process, Queue
+
+# from header import g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
 import RPi.GPIO as GPIO
 import sys
 import time
@@ -38,7 +39,6 @@ class SensorValues:
 def write():
     while True:
         write_global_var()
-        time.sleep(1)
 
 
 def read(mysql_con, mysql_cursor, potID):
@@ -62,9 +62,9 @@ def read(mysql_con, mysql_cursor, potID):
         )
 
         read_send_sql(
-            mysql_con, mysql_cursor, potID, q.g_temp, q.g_humid, q.g_soil, q.g_wflow, q.g_wlvl
+            mysql_con, mysql_cursor, potID, q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow
         )
-        read_dot_matrix(q.g_temp, q.g_humid, q.g_soil, q.g_wflow, q.g_wlvl)
+        read_dot_matrix(q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow)
 
         time.sleep(1)
 
@@ -82,7 +82,7 @@ def write_global_var():
 
 
 def read_send_sql(
-    mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
+    mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wlvl, l_wflow
 ):
     insert_executor(
         mysql_cursor,
@@ -90,16 +90,16 @@ def read_send_sql(
         "Sensors",
         potID,
         datetime.datetime.now(),
-        l_temperature,
-        l_humidity,
-        l_soil,
-        l_wflow,
-        0,
-        l_wlvl,
+        Temp=l_temperature,
+        Humid=l_humidity,
+        SoilMois=l_soil,
+        Wlvl=l_wlvl,
+        Cds=0,
+        Wflow=l_wflow,
     )
 
 
-def read_dot_matrix(l_temperature, l_humidity, l_soil, l_wflow, l_wlvl):
+def read_dot_matrix(l_temperature, l_humidity, l_soil, l_wlvl, l_wflow):
     if l_soil < 200:
         pump.doPumpTime(1)
     if l_temperature > 30:
@@ -137,18 +137,20 @@ def setup_system():
 if __name__ == "__main__":
     th_w, th_r, mysql_con, mysql_cursor = setup_system()
     try:
-        while True:
-            print("start")
-            que.join()
+        # while True:
+        print("start")
+        time.sleep(30)
+        # que.join()
 
-    except KeyboardInterrupt as e:
-        print(e)
+    except KeyboardInterrupt:
+        print("KeyboardInterrupttion")
 
     finally:
         GPIO.cleanup()
         mysql_con.close()
         th_w.join()
         th_r.join()
+        que.join()
 
 
 else:
