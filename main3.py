@@ -90,12 +90,12 @@ def read_send_sql(
         "Sensors",
         potID,
         datetime.datetime.now(),
-        Temp=l_temperature,
-        Humid=l_humidity,
-        SoilMois=l_soil,
-        Wlevel=l_wlvl,
-        Cds=0,
-        Wflow=l_wflow,
+        l_temperature,
+        l_humidity,
+        l_soil,
+        l_wlvl,
+        0,
+        l_wflow,
     )
 
 
@@ -138,14 +138,16 @@ if __name__ == "__main__":
     th_w, th_r, mysql_con, mysql_cursor = setup_system()
     try:
         # while True:
-        print("start")
-        time.sleep(30)
+        print("main start")
+        time.sleep(10)
+        print("main finished")
         # que.join()
 
     # except KeyboardInterrupt:
     #     print("KeyboardInterrupttion")
 
     finally:
+        print("cleanup started")
         GPIO.cleanup()
         mysql_con.close()
         th_w.join()
