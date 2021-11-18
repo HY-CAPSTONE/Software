@@ -60,9 +60,14 @@ if __name__ == "__main__":
 
         # insert_executor(mysql_cursor, "Planter",
         #                 "param1", "2021-11-7 12:53:33")
-        currtime = datetime.datetime.now()
-        print(currtime)
-        insert_executor(mysql_cursor, "Sensors", str(pid), str(currtime))
+
+        for i in range(10):
+            currtime = datetime.datetime.now()
+            print(currtime)
+            insert_executor(
+                mysql_cursor, mysql_con, "Sensors", str(pid), str(currtime), 99, 99, 99, 99, 99, 99
+            )
+            time.sleep(1)
         print("query_executor")
 
         mysql_cursor.close()
