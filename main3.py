@@ -18,6 +18,8 @@ import interaction
 from connect_mysql import setup_DB, insert_executor
 
 que = queue.Queue(2048)
+eve_r = threading.Event()
+eve_w = threading.Event()
 
 
 @dataclass
@@ -39,14 +41,21 @@ class SensorValues:
 def write():
     try:
         while True:
+            if eve_w.is_set():
+                return 0
             write_global_var()
     except:
         return 0
+    finally:
+        print("writer finally")
 
 
 def read(mysql_con, mysql_cursor, potID):
     try:
         while True:
+            if eve_r.is_set():
+                return 0
+
             # if que is empty, it will blocked for 100sec
             # after 100sec, it will occur "empty" exception
             # ** if block=True & timeout=None, this operation can't stop, it is not occur keyboardexception
@@ -70,10 +79,15 @@ def read(mysql_con, mysql_cursor, potID):
             )
             read_dot_matrix(q.g_temp, q.g_humid, q.g_soil, q.g_wlvl, q.g_wflow)
 
+            que.task_done()
             time.sleep(1)
 
     except OSError:
         return 0
+
+    finally:
+        # mysql_con.close()
+        print("reader finally")
 
 
 def write_global_var():
@@ -148,16 +162,23 @@ if __name__ == "__main__":
         print("main start")
         time.sleep(10)
         print("main finished")
-        # que.join()
-
-    # except KeyboardInterrupt:
-    #     print("KeyboardInterrupttion")
 
     finally:
         print("cleanup started")
+
+        # 큐에 남은 데이터를 모두 보내고 싶으면
+        # kill write
+        eve_w.set()
+        th_w.join()
+
         GPIO.cleanup()
-        mysql_con.close()
         que.join()
+
+        # kill read
+        eve_r.set()
+        th_r.join()
+        mysql_cursor.close()
+        mysql_con.close()
 
 
 else:
