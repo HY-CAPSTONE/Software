@@ -8,6 +8,7 @@ import sys
 import time
 import datetime
 
+
 import my_dht11 as dht
 import my_pump as pump
 import my_wflow as wflow
@@ -20,13 +21,9 @@ event = threading.Event()
 
 
 def read(mysql_con, mysql_cursor, potID):
-    # rw_mutex.acquire()
-    # read_send_sql(mysql_cursor, mysql_con, potID)
-    # read_dot_matrix()
-    # rw_mutex.release()
     global g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
     while True:
-        print("before write")
+        # print("before write")
 
         with rw_mutex:
             print("read")
@@ -35,7 +32,12 @@ def read(mysql_con, mysql_cursor, potID):
             l_soil = g_soil
             l_wflow = g_wflow
             l_wlvl = g_wlvl
-        print("after write")
+        # print("after write")
+        print(
+            "temp:{} humid:{} soil:{} wflow:{} wlvl:{}".format(
+                l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
+            )
+        )
 
         read_send_sql(
             mysql_con, mysql_cursor, potID, l_temperature, l_humidity, l_soil, l_wflow, l_wlvl
@@ -44,17 +46,14 @@ def read(mysql_con, mysql_cursor, potID):
 
 
 def write():
-    # rw_mutex.acquire()
-    # write_global_var()
-    # rw_mutex.release()
     while True:
-        print("before write")
+        # print("before write")
 
         with rw_mutex:
             print("write")
             write_global_var()
 
-        print("after write")
+        # print("after write")
 
 
 def write_global_var():

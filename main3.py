@@ -1,8 +1,4 @@
 import threading
-
-# from multiprocessing import Process, Queue
-
-# from header import g_temperature, g_humidity, g_soil, g_wflow, g_wlvl
 import RPi.GPIO as GPIO
 import sys
 import time
@@ -57,7 +53,7 @@ def read(mysql_con, mysql_cursor, potID):
                 return 0
 
             # if que is empty, it will blocked for 100sec
-            # after 100sec, it will occur "empty" exception
+            # after 100sec, it will occur "queue.Empty" exception
             # ** if block=True & timeout=None, this operation can't stop, it is not occur keyboardexception
             q = que.get(block=True, timeout=100)
 
@@ -98,7 +94,7 @@ def write_global_var():
     temp = SensorValues(g_temp, g_humid, g_soil, g_wflow, g_wlvl)
 
     # if que is full, it will blocked 100sec
-    # after 100sec, it occur "full" exception
+    # after 100sec, it occur "queue.Full" exception
     que.put(temp, block=True, timeout=100)
 
 
@@ -158,25 +154,28 @@ def setup_system():
 if __name__ == "__main__":
     th_w, th_r, mysql_con, mysql_cursor = setup_system()
     try:
-        # while True:
-        print("main start")
-        time.sleep(10)
-        print("main finished")
+        while True:
+            print("main start, 10sec sleep")
+            time.sleep(10)
 
     finally:
         print("cleanup started")
 
-        # 큐에 남은 데이터를 모두 보내고 싶으면
         # kill write
         eve_w.set()
         th_w.join()
 
+        # free GPIO
         GPIO.cleanup()
+
+        # wait until queue is empty
         que.join()
 
         # kill read
         eve_r.set()
         th_r.join()
+
+        # free connection
         mysql_cursor.close()
         mysql_con.close()
 

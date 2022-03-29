@@ -41,16 +41,21 @@ def check_PID(cursor, PID):
 def insert_executor(
     cursor, mysql_con, table_name, PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow
 ):
-    if table_name == "Sensors":
-        sql = "insert into Sensors(PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES(%s, %s, %s, %s, %s, %s, %s, %s);"
-    elif table_name == "Planter":
-        sql = "insert into Planter(Ptype, Pdate) values(%s, %s);"
+    try:
+        if table_name == "Sensors":
+            sql = "insert into Sensors(PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow) VALUES(%s, %s, %s, %s, %s, %s, %s, %s);"
+        elif table_name == "Planter":
+            sql = "insert into Planter(Ptype, Pdate) values(%s, %s);"
 
-    else:
-        print("no such tables")
+        else:
+            print("no such tables")
 
-    cursor.execute(sql, (PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow))
-    mysql_con.commit()
+        cursor.execute(sql, (PID, Stime, Temp, Humid, SoilMois, Wlevel, Cds, Wflow))
+        mysql_con.commit()
+
+    except mysql.connector.errors.OperationalError as e:
+        print(e)
+        return 0
 
 
 if __name__ == "__main__":
