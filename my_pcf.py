@@ -1,7 +1,7 @@
-import smbus
+import smbus2
 import time
 
-bus = smbus.SMBus(1)
+bus = smbus2.SMBus(1)
 
 def setup(address):
 	global addr
@@ -39,8 +39,6 @@ if __name__ == "__main__":
 		print("soil {0:0.1f}\n".format(getSoilMoisture()))
 		time.sleep(1)
 		print("wlevel {0:0.1f}\n".format(getWaterLevel()))
-		time.sleep(1)
-		print("cds {0:0.1f}\n".format(getCDS()))
 		time.sleep(1)
 
 else:
