@@ -7,7 +7,7 @@ import datetime
 # 자신의 PID가 DB에 없으면, wait
 def setup_DB():
     pid = 99
-    mysql_con = create_sql_connector("112.170.208.72", "20", "testDB", "root", "wlgkcjf21gh")
+    mysql_con = create_sql_connector("112.170.208.72", "8910", "testDB", "root", "wlgkcjf21gh")
 
     mysql_cursor = create_sql_cursor(mysql_con)
 

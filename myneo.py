@@ -33,6 +33,6 @@ pixels[7] = (0, 70, 255)
 
 
 pixels.show()
-time.sleep(3)
+time.sleep(36000)
 pixels.fill((0, 0, 0))
 pixels.show()

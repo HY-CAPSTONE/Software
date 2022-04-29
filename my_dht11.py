@@ -2,7 +2,7 @@ import Adafruit_DHT
 
 
 sensor = Adafruit_DHT.DHT11
-DHT_PIN = 12
+DHT_PIN = 4
 
 
 def readValue():
