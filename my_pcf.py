@@ -9,7 +9,7 @@ def setup(address):
 
 def getSoilMoisture():
 	try:
-		bus.write_byte(addr, 0x41)
+		bus.write_byte(addr, 0x40)
 	except:
 		print("soil error")
 	bus.read_byte(addr) # dummy read to start conversion
@@ -18,20 +18,12 @@ def getSoilMoisture():
 
 def getWaterLevel():
 	try:
-		bus.write_byte(addr, 0x40)
+		bus.write_byte(addr, 0x41)
 	except:
 		print("wlevel error")
 	bus.read_byte(addr) # dummy read to start conversion
 	return bus.read_byte(addr)
 
-def getCDS():
-	try:
-		bus.write_byte(addr, 0x42)
-		sum = bus.read_byte(addr)
-	except:
-		print("CDS error")
-	
-	return sum
 
 if __name__ == "__main__":
 	setup(0x48)
