@@ -9,7 +9,7 @@ import queue
 import my_dht11 as dht
 import my_pump as pump
 import my_pcf as pcf
-from connect_mysql import setup_DB, insert_executor
+from connect_mysql import connect_DB, insert_executor
 
 que = queue.Queue(2048)
 eve_r = threading.Event()
@@ -91,8 +91,8 @@ def write_global_var():
 
 def read_send_sql(mysql_con, mysql_cursor, PID, q):
     insert_executor(
-        mysql_cursor,
         mysql_con,
+        mysql_cursor,
         "Plant",
         PID,
         # datetime.datetime.now(),
@@ -100,8 +100,8 @@ def read_send_sql(mysql_con, mysql_cursor, PID, q):
         f"/images/{PID}",
     )
     insert_executor(
-        mysql_cursor,
         mysql_con,
+        mysql_cursor,
         "Gallery",
         PID,
         # datetime.datetime.now(),
@@ -112,7 +112,7 @@ def read_send_sql(mysql_con, mysql_cursor, PID, q):
 
 def setup_():
     # setup DB connection
-    mysql_con, mysql_cursor, PID = setup_DB()
+    mysql_con, mysql_cursor, PID = connect_DB()
 
     th1 = threading.Thread(target=write, daemon=True)
     th1.start()

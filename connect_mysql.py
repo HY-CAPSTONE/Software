@@ -21,16 +21,19 @@ def check_PID(cursor, PID):
         return True
 
 
-def insert_executor(cursor, mysql_con, table_name, PID, q, SAVE_PATH):
+def insert_executor(mysql_con,cursor, table_name, PID, q, SAVE_PATH):
     try:
         # TODO parsing code needed
         if table_name == "Plant":
-            sql = "insert into Plant (PID, ICON, LED, TEMP , HUMID, SOIL, TANK, TIME) VALUES(%s, %s, %s, %s, %s, %s, %s, NOW());"
-            cursor.execute(sql, (PID, 0, 0, q.TEMP, q.HUMID, q.SOIL, q.TANK))
+            sql = ("insert into Plant (PID, ICON, LED, TEMP , HUMID, SOIL, TANK, TIME)" 
+                  "VALUES(%(PID)s, %(ICON)s, %(LED)s, %(TEMP)s, %(HUMID)s, %(SOIL)s, %(TANK)s, NOW());")
+            data = {'PID' : PID, 'ICON':0, 'LED':0, 'TEMP':q.TEMP, 'HUMID':q.HUMID, 'SOIL':q.SOIL, 'TANK':q.TANK}
+            cursor.execute(sql, data)
 
         elif table_name == "Gallery":
-            sql = "insert into Gallery (PID, SAVE_DATE, SAVE_PATH) values(%s, NOW(), %s);"
-            cursor.execute(sql, (PID, SAVE_PATH))
+            sql = "insert into Gallery (PID, SAVE_DATE, SAVE_PATH) values(%(PID)s, NOW(), %(SAVE_PATH)s);"
+            data = {'PID': PID, 'SAVE_PATH':SAVE_PATH}
+            cursor.execute(sql, data)
 
         else:
             print("no such tables")
@@ -60,7 +63,10 @@ if __name__ == "__main__":
                 self.TANK = wlvl
 
         print("start")
-        mysql_con, mysql_cursor, pid = connect_DB()
+        mysql_con = mysql.connector.connect(host="112.170.208.72", port="8080", database="capstone", user="root", password="wlgkcjf21gh")
+        mysql_cursor = mysql_con.cursor(dictionary=True)
+        pid = 99
+        # mysql_con, mysql_cursor, pid = connect_DB()
 
         # for i in range(10):
         #     currtime = datetime.datetime.now()
