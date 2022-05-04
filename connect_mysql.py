@@ -1,11 +1,7 @@
-from main3 import SensorValues
 import mysql.connector
 import time
 import datetime
 
-
-# connection, cursor, pid를 리턴.
-# 자신의 PID가 DB에 없으면, wait
 def connect_DB():
     pid = 99
     mysql_con = mysql.connector.connect(
@@ -30,7 +26,7 @@ def insert_executor(cursor, mysql_con, table_name, PID, q, SAVE_PATH):
         # TODO parsing code needed
         if table_name == "Plant":
             sql = "insert into Plant (PID, ICON, LED, TEMP , HUMID, SOIL, TANK, TIME) VALUES(%s, %s, %s, %s, %s, %s, %s, NOW());"
-            cursor.execute(sql, (PID, q.ICON, q.LED, q.TEMP, q.HUMID, q.SOIL, q.TANK))
+            cursor.execute(sql, (PID, 0, 0, q.TEMP, q.HUMID, q.SOIL, q.TANK))
 
         elif table_name == "Gallery":
             sql = "insert into Gallery (PID, SAVE_DATE, SAVE_PATH) values(%s, NOW(), %s);"
@@ -48,6 +44,21 @@ def insert_executor(cursor, mysql_con, table_name, PID, q, SAVE_PATH):
 
 if __name__ == "__main__":
     try:
+        from dataclasses import dataclass
+
+        @dataclass
+        class SensorValues:
+            TEMP: int = None
+            HUMID: int = None
+            SOIL: int = None
+            TANK: int = None
+
+            def __init__(self, temp, humid, soil, wlvl):
+                self.TEMP = temp
+                self.HUMID = humid
+                self.SOIL = soil
+                self.TANK = wlvl
+
         print("start")
         mysql_con, mysql_cursor, pid = connect_DB()
 
@@ -60,7 +71,7 @@ if __name__ == "__main__":
         #     time.sleep(1)
         q = SensorValues(-1, -1, -1, -1)
         insert_executor(mysql_con, mysql_cursor, "Plant", pid, q, f"/images/{pid}")
-
+        mysql_con.commit()
         print("query_executor")
 
         mysql_cursor.close()
