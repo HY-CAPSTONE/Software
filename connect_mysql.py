@@ -25,13 +25,13 @@ def insert_executor(mysql_con,cursor, table_name, PID, q, SAVE_PATH):
     try:
         # TODO parsing code needed
         if table_name == "Plant":
-            sql = ("insert into Plant (PID, ICON, LED, TEMP , HUMID, SOIL, TANK, TIME)" 
+            sql = ("insert into Plant (Plant_id, ICON_pic, LED, TEMP , HUMID, SOIL, TANK, TIME)" 
                   "VALUES(%(PID)s, %(ICON)s, %(LED)s, %(TEMP)s, %(HUMID)s, %(SOIL)s, %(TANK)s, NOW());")
             data = {'PID' : PID, 'ICON':0, 'LED':0, 'TEMP':q.TEMP, 'HUMID':q.HUMID, 'SOIL':q.SOIL, 'TANK':q.TANK}
             cursor.execute(sql, data)
 
         elif table_name == "Gallery":
-            sql = "insert into Gallery (PID, SAVE_DATE, SAVE_PATH) values(%(PID)s, NOW(), %(SAVE_PATH)s);"
+            sql = "insert into Gallery (Plant_id, SAVE_DATE, SAVE_PATH) values(%(PID)s, NOW(), %(SAVE_PATH)s);"
             data = {'PID': PID, 'SAVE_PATH':SAVE_PATH}
             cursor.execute(sql, data)
 

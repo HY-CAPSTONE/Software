@@ -20,4 +20,4 @@ def doPumpTime(sec):
 
 
 if __name__ == "__main__":
-	doPumpTime(1)
+	doPumpTime(3)

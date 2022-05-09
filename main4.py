@@ -9,12 +9,16 @@ import queue
 import my_dht11 as dht
 import my_pump as pump
 import my_pcf as pcf
+import my_neo as neo
 from connect_mysql import connect_DB, insert_executor
 
 que = queue.Queue(2048)
 eve_r = threading.Event()
 eve_w = threading.Event()
-
+r_lock = threading.Lock()
+w_lock = threading.Lock()
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17, GPIO.OUT)
 
 @dataclass
 class SensorValues:
@@ -33,8 +37,9 @@ class SensorValues:
 def write():
     try:
         while True:
-            if eve_w.is_set():
-                return 0
+            with w_lock:
+                if eve_w.is_set():
+                    return 0
             write_global_var()
     except:
         return 0
@@ -45,14 +50,15 @@ def write():
 def read(mysql_con, mysql_cursor, potID):
     try:
         while True:
-            if eve_r.is_set():
-                return 0
+            with r_lock:
+                if eve_r.is_set():
+                    return 0
 
             # if que is empty, it will blocked for 100sec
             # after 100sec, it will occur "queue.Empty" exception
             # ** if block=True & timeout=None, this operation can't stop, it is not occur keyboardexception
             q = que.get(block=True, timeout=100)
-
+            que.task_done()
             # 가져온 10개의 데이터의 평균을 로컬로 저장
 
             # 로컬 값을 쏴주기
@@ -65,16 +71,24 @@ def read(mysql_con, mysql_cursor, potID):
                 )
             )
 
-            read_send_sql(mysql_con, mysql_cursor, potID, q)
+#            read_send_sql(mysql_con, mysql_cursor, potID, q)
 
-            que.task_done()
-            time.sleep(1)
+            if (q.SOIL == 255):
+                pump.stopPump()
+            elif (q.SOIL < 254) :
+                pump.doPump()
+            elif (q.SOIL > 200) :
+                pump.stopPump()
 
-    except OSError:
+            if (q.TANK < 100) :
+                GPIO.output(17, True)
+            else :
+                GPIO.output(17, False)
+
+    except :
         return 0
 
     finally:
-        # mysql_con.close()
         print("reader finally")
 
 
@@ -114,10 +128,10 @@ def setup_():
     # setup DB connection
     mysql_con, mysql_cursor, PID = connect_DB()
 
-    th1 = threading.Thread(target=write, daemon=True)
+    th1 = threading.Thread(target=write)
     th1.start()
 
-    th2 = threading.Thread(target=read, daemon=True, args=(mysql_con, mysql_cursor, PID))
+    th2 = threading.Thread(target=read, args=(mysql_con, mysql_cursor, PID))
     th2.start()
 
     # make thread for I/O
@@ -126,6 +140,7 @@ def setup_():
 
 if __name__ == "__main__":
     th_w, th_r, mysql_con, mysql_cursor = setup_()
+    neo.doNeoPixel()
     try:
         while True:
             print("main start, 10sec sleep")
@@ -135,23 +150,27 @@ if __name__ == "__main__":
         print("cleanup started")
 
         # kill write
-        eve_w.set()
+        with w_lock:
+            eve_w.set()
         th_w.join()
 
-        # free GPIO
-        GPIO.cleanup()
-
         # wait until queue is empty
-        que.join()
+#        que.join()
 
         # kill read
-        eve_r.set()
+        with r_lock:
+            eve_r.set()
         th_r.join()
 
         # free connection
         mysql_cursor.close()
         mysql_con.close()
 
+        # free GPIO
+        pump.stopPump()
+        neo.stopNeoPixel()
+        GPIO.output(17, False)
+        GPIO.cleanup()
 
 else:
     # do nothing

@@ -24,14 +24,28 @@ def getWaterLevel():
 	bus.read_byte(addr) # dummy read to start conversion
 	return bus.read_byte(addr)
 
+def test1():
+	try:
+		bus.write_byte(addr, 0x42)
+	except:
+		print("error")
+	bus.read_byte(addr)
+	return bus.read_byte(addr)
+
+def test2():
+	bus.write(addr, 0x43)
+	bus.read_byte(addr)
+	return bus.read_byte(addr)
 
 if __name__ == "__main__":
 	setup(0x48)
 	while True:
 		print("soil {0:0.1f}\n".format(getSoilMoisture()))
-		time.sleep(1)
+		#time.sleep(2)
 		print("wlevel {0:0.1f}\n".format(getWaterLevel()))
-		time.sleep(1)
-
+		print("\n")
+		time.sleep(2)
+		print(test1())
+		#print(test2())
 else:
 	setup(0x48)
