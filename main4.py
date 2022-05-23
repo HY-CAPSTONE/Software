@@ -5,6 +5,8 @@ import time
 import datetime
 from dataclasses import dataclass
 import queue
+import os
+import subprocess
 
 import my_dht11 as dht
 import my_pump as pump
@@ -57,7 +59,7 @@ def read(mysql_con, mysql_cursor, potID):
             # if que is empty, it will blocked for 100sec
             # after 100sec, it will occur "queue.Empty" exception
             # ** if block=True & timeout=None, this operation can't stop, it is not occur keyboardexception
-            q = que.get(block=True, timeout=100)
+            q = que.get(block=True, timeout=None)
             que.task_done()
             # 가져온 10개의 데이터의 평균을 로컬로 저장
 
@@ -72,6 +74,11 @@ def read(mysql_con, mysql_cursor, potID):
             )
 
 #            read_send_sql(mysql_con, mysql_cursor, potID, q)
+            TEMP = int(q.TEMP)
+            HUMID = int(q.HUMID)
+            SOIL = int(q.SOIL)
+            TANK = int(q.TANK)
+            subprocess.run(["/home/pi/HomeFarm/Bitmap/TFTDisplay", f"{TEMP}", f"{HUMID}", f"{SOIL}", f"{TANK}"], stdout=subprocess.DEVNULL)
 
             if (q.SOIL == 255):
                 pump.stopPump()
@@ -81,11 +88,13 @@ def read(mysql_con, mysql_cursor, potID):
                 pump.stopPump()
 
             if (q.TANK < 100) :
-                GPIO.output(17, True)
+                print("TANL LOw")
             else :
-                GPIO.output(17, False)
+                print("TNK HIGH")
 
+			# execute LCDcode
     except :
+        print('reader exception occur')
         return 0
 
     finally:
