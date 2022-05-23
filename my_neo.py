@@ -38,6 +38,13 @@ def stopNeoPixel():
     pixels.fill((0,0,0))
     pixels.show() 
 
+def doMoodNeoPixel():
+	pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False, pixel_order=ORDER)
+	#FF9800
+	pixels.fill((255,152,0 ))
+	pixels.show()
+	
+
 if __name__ == "__main__":
     pixels[0] = (239, 0, 0)
     pixels[1] = (0, 70, 255)
@@ -50,9 +57,8 @@ if __name__ == "__main__":
 
 
     pixels.show()
-    time.sleep(36000)
-    pixels.fill((0, 0, 0))
-    pixels.show()
+    time.sleep(3)
+    stopNeoPixel()
 else :
     pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=1, auto_write=False, pixel_order=ORDER) 
     # do nothing
