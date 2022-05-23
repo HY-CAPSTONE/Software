@@ -11,15 +11,14 @@ def connect_DB():
     return mysql_con, mysql_cursor, pid
 
 
-def check_PID(cursor, PID):
-    sql = "select * from Planter where PID = {}".format(PID)
-    cursor.execute(sql)
-    row = cursor.fetchone()
-    if row == None:
-        return False
-    else:
-        return True
-
+def select_executor(con, cursor, table):
+	try:
+		sql = "select * from Control"
+		cursor.execute(sql)
+		return cursor.fetchone()
+	except mysql.connector.errors as e:
+		print(e)
+		return 0
 
 def insert_executor(mysql_con,cursor, table_name, PID, q, SAVE_PATH):
     try:
