@@ -14,7 +14,7 @@ import my_dht11 as dht
 import my_pump as pump
 import my_pcf as pcf
 import my_neo as neo
-from connect_mysql import connect_DB, insert_executor, select_executor
+from connect_mysql import connect_DB, insert_executor, select_executor, update_executor
 
 que = queue.Queue(2048)
 eve_r = threading.Event()
@@ -39,7 +39,7 @@ class SensorValues:
         self.TANK = wlvl
 
 
-def read_send_sql(mysql_con, mysql_cursor, PID, q):
+def read_send_sql(mysql_con, mysql_cursor, PID, q, led_state):
     insert_executor(
         mysql_con,
         mysql_cursor,
@@ -47,18 +47,15 @@ def read_send_sql(mysql_con, mysql_cursor, PID, q):
         PID,
         q,
         f"/images/{PID}",
+		led_state
     )
-#    insert_executor(
-#        mysql_con,
-#        mysql_cursor,
-#        "Gallery",
-#        PID,
-#        q,
-#        f"/images/{PID}",
-#    )
-
-
-
+    update_executor(
+        mysql_con,
+        mysql_cursor,
+        "Control",
+        PID,
+        led_state
+    )
 
 def sql_query(q, pid):
     try:
@@ -68,13 +65,16 @@ def sql_query(q, pid):
              print(rows)
              if (rows['CTRL_TYPE']==1):
                  neo.doNeoPixel()
-             elif (rows['CTRL_TYPE']==2):
+                 led_state = 1
+             elif (rows['CTRL_TYPE']==0):
                  neo.stopNeoPixel()
+                 led_state = 0
              else:
                  neo.doMoodNeoPixel()
+                 led_state = 2
              time.sleep(1)
 
-             read_send_sql(sql_con, sql_cursor, pid, q)
+             read_send_sql(sql_con, sql_cursor, pid, q, led_state)
              time.sleep(1)
     finally:
         sql_cursor.close()
@@ -88,6 +88,7 @@ def write():
                 if eve_w.is_set():
                     return 0
             write_global_var()
+            time.sleep(55)
     except:
         return 0
     finally:
@@ -130,7 +131,7 @@ def read(potID):
                 pump.stopPump()
             elif (q.SOIL < 254) :
                 pump.doPump()
-            elif (q.SOIL > 200) :
+            elif (q.SOIL > 240) :
                 pump.stopPump()
 
             if (q.TANK < 100) :
@@ -167,7 +168,7 @@ def Videostreaming(camera, connection):
         time.sleep(2)
         camera.start_recording(connection, format='h264')
         while not eve_stream.is_set():
-            camera.wait_recording(10)
+            camera.wait_recording(100)
     except socket.error as e:
         print("thread trem")
         camera.stop_recording()
