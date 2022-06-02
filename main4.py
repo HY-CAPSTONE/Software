@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import queue
 import os
 import subprocess
+import requests
+import json
 
 import my_dht11 as dht
 import my_pump as pump
@@ -80,6 +82,17 @@ def read(mysql_con, mysql_cursor, potID):
             TANK = int(q.TANK)
             subprocess.run(["/home/pi/HomeFarm/Bitmap/TFTDisplay", f"{TEMP}", f"{HUMID}", f"{SOIL}", f"{TANK}"], stdout=subprocess.DEVNULL)
 
+            api = "https://api.openweathermap.org/data/2.5/weather?q={city}&APPID={key}"
+            url = api.format(city = "Seoul", key = "0276eeb82a71d9b7c07ce64e78fc7a3a")
+            res = requests.get(url)
+            data = json.loads(res.text)
+
+            if (int(data["sys"]["sunset"]) - time.time() < 5 and int(data["sys"]["sunset"]) - time.time() > -5):
+                neo.doNeoPixel()
+            if (int(data["sys"]["sunrise"]) - time.time() < 5 and int(data["sys"]["sunrise"]) - time.time() > -5):
+                neo.stopNeoPixel()
+            print(int(data["sys"]["sunset"]) - time.time())
+
             if (q.SOIL == 255):
                 pump.stopPump()
             elif (q.SOIL < 254) :
@@ -91,7 +104,7 @@ def read(mysql_con, mysql_cursor, potID):
                 print("TANL LOw")
             else :
                 print("TNK HIGH")
-
+            
 			# execute LCDcode
     except :
         print('reader exception occur')
