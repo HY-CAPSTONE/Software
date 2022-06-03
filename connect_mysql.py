@@ -20,29 +20,43 @@ def select_executor(con, cursor, table):
 		print(e)
 		return 0
 
-def insert_executor(mysql_con,cursor, table_name, PID, q, SAVE_PATH):
-    try:
-        # TODO parsing code needed
-        if table_name == "Plant":
-            sql = ("insert into Plant (Plant_id, ICON_pic, LED, TEMP , HUMID, SOIL, TANK, TIME)" 
-                  "VALUES(%(PID)s, %(ICON)s, %(LED)s, %(TEMP)s, %(HUMID)s, %(SOIL)s, %(TANK)s, NOW());")
-            data = {'PID' : PID, 'ICON':0, 'LED':0, 'TEMP':q.TEMP, 'HUMID':q.HUMID, 'SOIL':q.SOIL, 'TANK':q.TANK}
-            cursor.execute(sql, data)
+def insert_executor(mysql_con,cursor, table_name, PID, q, SAVE_PATH, led_state):
+	try:
+		# TODO parsing code needed
+		if table_name == "Plant2":
+			sql = ("insert into Plant2 (Plant_id, ICON_pic, LED, TEMP , HUMID, SOIL, TANK, TIME)" 
+					"VALUES(%(PID)s, %(ICON)s, %(LED)s, %(TEMP)s, %(HUMID)s, %(SOIL)s, %(TANK)s, NOW());")
+			data = {'PID' : PID, 'ICON':0, 'LED':led_state, 'TEMP':q.TEMP, 'HUMID':q.HUMID, 'SOIL':q.SOIL, 'TANK':q.TANK}
+			cursor.execute(sql, data)
 
-        elif table_name == "Gallery":
-            sql = "insert into Gallery (Plant_id, SAVE_DATE, SAVE_PATH) values(%(PID)s, NOW(), %(SAVE_PATH)s);"
-            data = {'PID': PID, 'SAVE_PATH':SAVE_PATH}
-            cursor.execute(sql, data)
+		elif table_name == "Gallery":
+			sql = "insert into Gallery (Plant_id, SAVE_DATE, SAVE_PATH) values(%(PID)s, NOW(), %(SAVE_PATH)s);"
+			data = {'PID': PID, 'SAVE_PATH':SAVE_PATH}
+			cursor.execute(sql, data)
+		elif table_name == "Control":
+			sql = "insert into Control (PLANT_ID, CTRL_TYPE) values(%(PID)s, %(led_state)s);"
+			data = {"PID":PID, "led_state":led_state}
+			cursor.execute(sql, data)
+		else:
+			print(table_name)
+			print("no such tables")
 
-        else:
-            print("no such tables")
+		mysql_con.commit()
 
-        mysql_con.commit()
+	except mysql.connector.errors.OperationalError as e:
+		print(e)
+		return 0
 
-    except mysql.connector.errors.OperationalError as e:
-        print(e)
-        return 0
-
+def update_executor(mysql_con, cursor, table_name, PID, led_state):
+	try:
+		if table_name == "Control":
+			sql = "update Control set PLANT_ID=%(PID)s, CTRL_TYPE=%(led_state)s where 1;"
+			data = {"PID":PID, "led_state":led_state}
+			cursor.execute(sql, data)
+		mysql_con.commit()
+	except mysql.connector.errors.OperationalError as e:
+		print(e)
+		return 0
 
 if __name__ == "__main__":
     try:

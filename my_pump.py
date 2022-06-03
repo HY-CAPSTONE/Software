@@ -21,3 +21,4 @@ def doPumpTime(sec):
 
 if __name__ == "__main__":
 	doPumpTime(3)
+	stopPump()

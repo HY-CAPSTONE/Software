@@ -10,14 +10,11 @@ import os
 import subprocess
 import picamera
 
-import requests
-import json
-
 import my_dht11 as dht
 import my_pump as pump
 import my_pcf as pcf
 import my_neo as neo
-from connect_mysql import connect_DB, insert_executor, select_executor, update_executor
+from connect_mysql import connect_DB, insert_executor, select_executor
 
 que = queue.Queue(2048)
 eve_r = threading.Event()
@@ -42,67 +39,25 @@ class SensorValues:
         self.TANK = wlvl
 
 
-def read_send_sql(mysql_con, mysql_cursor, PID, q, led_state):
-    insert_executor(
-        mysql_con,
-        mysql_cursor,
-        "Plant2",
-        PID,
-        q,
-        f"/images/{PID}",
-		led_state
-    )
-    #update_executor(
-    #    mysql_con,
-    #    mysql_cursor,
-    #    "Control",
-    #    PID,
-    #    led_state
-    #)
-
-def sql_query(q, pid):
-    try:
-        print("start sql query")
-        sql_con, sql_cursor, pid = connect_DB()
-        time.sleep(1)
-        rows = select_executor(sql_con, sql_cursor, "Control")
-        print(rows)
-        if (rows['CTRL_TYPE']==1):
-            neo.doNeoPixel()
-            led_state = 1
-        elif (rows['CTRL_TYPE']==0):
-            neo.stopNeoPixel()
-            led_state = 0
-        else:
-            neo.doMoodNeoPixel()
-            led_state = 2
-        time.sleep(1)
-
-        read_send_sql(sql_con, sql_cursor, pid, q, led_state)
-    finally:
-        sql_cursor.close()
-        sql_con.close()
-
-
 def write():
     try:
         while True:
-            if eve_w.is_set():
-                return 0
+            with w_lock:
+                if eve_w.is_set():
+                    return 0
             write_global_var()
-            print('write done')
-            time.sleep(3)
     except:
         return 0
     finally:
         print("writer finally")
 
 
-def read(potID):
+def read(mysql_con, mysql_cursor, potID):
     try:
         while True:
-            if eve_r.is_set():
-                return 0
+            with r_lock:
+                if eve_r.is_set():
+                    return 0
 
             # if que is empty, it will blocked for 100sec
             # after 100sec, it will occur "queue.Empty" exception
@@ -121,50 +76,32 @@ def read(potID):
                 )
             )
 
-
-#            api = "https://api.openweathermap.org/data/2.5/weather?q={city}&APPID={key}"
-#            url = api.format(city = "Seoul", key = "0276eeb82a71d9b7c07ce64e78fc7a3a")
-#            res = requests.get(url)
-#            data = json.loads(res.text)
-#            if (int(data["sys"]["sunset"]) - time.time() < 5 and int(data["sys"]["sunset"]) - time.time() > -5):
-#                neo.doNeoPixel()
-#            if (int(data["sys"]["sunrise"]) - time.time() < 5 and int(data["sys"]["sunrise"]) - time.time() > -5):
-#                neo.stopNeoPixel()
-#            print(int(data["sys"]["sunset"]) - time.time())
-
-            sql_query(q, potID)
-            
+#            read_send_sql(mysql_con, mysql_cursor, potID, q)
             TEMP = int(q.TEMP)
             HUMID = int(q.HUMID)
             SOIL = int(q.SOIL)
             TANK = int(q.TANK)
-            subprocess.run(["/home/pi/HomeFarm/Bitmap/TFTDisplay", f"{TEMP}", f"{HUMID}", f"{255-SOIL}", f"{TANK}"], stdout=subprocess.DEVNULL)
-            print("end monitor")
-            time.sleep(1)
+            subprocess.run(["/home/pi/HomeFarm/Bitmap/TFTDisplay", f"{TEMP}", f"{HUMID}", f"{SOIL}", f"{TANK}"], stdout=subprocess.DEVNULL)
 
-            if (SOIL <= 255 and SOIL >= 201):
-                print("do")
-                print(q.SOIL)
+            if (q.SOIL == 255):
+                pump.stopPump()
+            elif (q.SOIL < 254) :
                 pump.doPump()
-            else :
-                print("stop")
+            elif (q.SOIL > 200) :
                 pump.stopPump()
 
             if (q.TANK < 100) :
                 print("TANL LOw")
             else :
                 print("TNK HIGH")
-            #time.sleep(54)
 
 			# execute LCDcode
-    except Exception as e:
-        print('reader exception occur', e)
+    except :
+        print('reader exception occur')
         return 0
 
     finally:
         print("reader finally")
-
-
 
 
 def write_global_var():
@@ -178,17 +115,56 @@ def write_global_var():
     que.put(temp, block=True, timeout=100)
 
 
+def read_send_sql(mysql_con, mysql_cursor, PID, q):
+    insert_executor(
+        mysql_con,
+        mysql_cursor,
+        "Plant",
+        PID,
+        # datetime.datetime.now(),
+        q,
+        f"/images/{PID}",
+    )
+    insert_executor(
+        mysql_con,
+        mysql_cursor,
+        "Gallery",
+        PID,
+        # datetime.datetime.now(),
+        q,
+        f"/images/{PID}",
+    )
+
+def Control_LED():
+    try:
+       while not eve_led.is_set():
+            sql_con, sql_cursor, pid = connect_DB()
+            rows = select_executor(sql_con, sql_cursor, "Control")
+            print(rows)
+            if (rows['CTRL_TYPE']==1):
+                neo.doNeoPixel()
+            elif (rows['CTRL_TYPE']==2):
+                neo.stopNeoPixel()
+            else:
+                neo.doMoodNeoPixel()
+            time.sleep(1)
+
+    finally:
+        sql_cursor.close()
+        sql_con.close()
 
 def Videostreaming(camera, connection):
     try:
-        camera.start_preview()
-        time.sleep(2)
+        #camera.start_preview()
+        #time.sleep(2)
         camera.start_recording(connection, format='h264')
         while not eve_stream.is_set():
-            camera.wait_recording(100)
+            camera.wait_recording(2)
     except socket.error as e:
         print("thread trem")
+    finally:
         camera.stop_recording()
+        return 0
 
 def Streaming_camera():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serv_sock:
@@ -202,23 +178,31 @@ def Streaming_camera():
                 th_tmp = threading.Thread(target=Videostreaming, args=(camera, connection))
                 th_tmp.start()
                 th_tmp.join()
+                connection.close()
+        serv_sock.close()
 
 def setup_():
+    # setup DB connection
+    mysql_con, mysql_cursor, PID = connect_DB()
+
     th1 = threading.Thread(target=write)
     th1.start()
 
-    th2 = threading.Thread(target=read, args=[99])
+    th2 = threading.Thread(target=read, args=(mysql_con, mysql_cursor, PID))
     th2.start()
+
+    th3 = threading.Thread(target=Control_LED) 
+    th3.start()
 
     th4 = threading.Thread(target=Streaming_camera )
     th4.start()
 
     # make thread for I/O
-    return th1, th2,  th4
+    return th1, th2, th3, th4, mysql_con, mysql_cursor
 
 
 if __name__ == "__main__":
-    th_w, th_r, th_stream = setup_()
+    th_w, th_r, th_led, th_stream, mysql_con, mysql_cursor = setup_()
     # neo.doNeoPixel()
     try:
         while True:
@@ -229,19 +213,27 @@ if __name__ == "__main__":
         print("cleanup started")
 
         # kill write
-        
-        eve_w.set()
+        with w_lock:
+            eve_w.set()
         th_w.join()
 
         # wait until queue is empty
 #        que.join()
 
         # kill read
-        eve_r.set()
+        with r_lock:
+            eve_r.set()
         th_r.join()
 		
         eve_stream.set()
         th_stream.join()
+
+        eve_led.set()
+        th_led.join()
+
+        # free connection
+        mysql_cursor.close()
+        mysql_con.close()
 
         # free GPIO
         pump.stopPump()

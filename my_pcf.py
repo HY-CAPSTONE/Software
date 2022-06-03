@@ -45,7 +45,7 @@ if __name__ == "__main__":
 		print("wlevel {0:0.1f}\n".format(getWaterLevel()))
 		print("\n")
 		time.sleep(2)
-		print(test1())
+		#print("42: {0:0.1f}\n".format(test1()))
 		#print(test2())
 else:
 	setup(0x48)
